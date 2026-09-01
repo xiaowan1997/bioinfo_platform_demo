@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>历史任务 - 医学共享平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            indigo: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA' },
+            saw: '#5F1785',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .material-icons { font-size: 20px; vertical-align: middle; }
+    .material-icons.md-18 { font-size: 18px; }
+    .material-icons.md-24 { font-size: 24px; }
+    .material-icons.md-36 { font-size: 36px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-collapsed { width: 5rem !important; }
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+  </style>
+  
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+    
+    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
+      <div class="flex items-center">
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
+          <span class="material-icons">menu</span>
+        </button>
+        <a href="../index.html" class="text-xl font-bold ml-2 text-indigo-600 tracking-tight no-underline">医学共享平台</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-medium">后端正常</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="flex-1 flex overflow-hidden">
+      
+    <!-- 侧边栏抽屉 (对齐 frontend/main.py: left_drawer) -->
+    <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
+      <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div class="flex items-center gap-2 mb-4 px-2">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="text-sm font-bold text-gray-600 sidebar-label">Welcome!</span>
+        </div>
+
+        
+        <a href="../index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">home</span>
+          <span class="sidebar-label">首页</span>
+        </a>
+        
+        <a href="history.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <span class="material-icons text-indigo-600">history</span>
+          <span class="sidebar-label">历史任务</span>
+        </a>
+        
+        <a href="pipeline.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">biotech</span>
+          <span class="sidebar-label">分析流程</span>
+        </a>
+        
+        <a href="visualization.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">pie_chart</span>
+          <span class="sidebar-label">可视化</span>
+        </a>
+        
+        <a href="chat_biomni.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">smart_toy</span>
+          <span class="sidebar-label">Chat-Biomni</span>
+        </a>
+        
+
+        <div class="flex-1"></div>
+        <div class="my-2 border-t border-gray-100"></div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs text-gray-500 font-medium sidebar-label">后端正常</span>
+        </div>
+      </div>
+    </aside>
+    
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
+        
+<div class="w-full max-w-7xl mx-auto space-y-6">
+  <div class="w-full bg-indigo-600 text-white rounded-2xl px-6 py-4 flex items-center justify-between shadow-md">
+    <h1 class="text-2xl font-bold">历史任务</h1>
+    <button onclick="alert('已导出全量 tasks.csv！')" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-indigo-50 transition shadow-xs">
+      导出 CSV
+    </button>
+  </div>
+
+  <div class="w-full grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div @click="filter = 'all'" :class="filter === 'all' ? 'bg-indigo-50 border-2 border-indigo-400' : 'border border-gray-200/80 bg-white'" class="rounded-xl p-4 cursor-pointer hover:shadow-md transition text-center">
+      <div class="text-2xl font-bold text-indigo-600">{{ tasks.length }}</div>
+      <div class="text-sm text-gray-500 mt-1">全部</div>
+    </div>
+    <div @click="filter = 'success'" :class="filter === 'success' ? 'bg-green-50 border-2 border-green-400' : 'border border-gray-200/80 bg-white'" class="rounded-xl p-4 cursor-pointer hover:shadow-md transition text-center">
+      <div class="text-2xl font-bold text-green-600">{{ tasks.filter(t => t.Status.toLowerCase() === 'success').length }}</div>
+      <div class="text-sm text-gray-500 mt-1">成功</div>
+    </div>
+    <div @click="filter = 'running'" :class="filter === 'running' ? 'bg-amber-50 border-2 border-amber-400' : 'border border-gray-200/80 bg-white'" class="rounded-xl p-4 cursor-pointer hover:shadow-md transition text-center">
+      <div class="text-2xl font-bold text-amber-600">{{ tasks.filter(t => t.Status.toLowerCase() === 'running').length }}</div>
+      <div class="text-sm text-gray-500 mt-1">运行中</div>
+    </div>
+    <div @click="filter = 'failed'" :class="filter === 'failed' ? 'bg-red-50 border-2 border-red-400' : 'border border-gray-200/80 bg-white'" class="rounded-xl p-4 cursor-pointer hover:shadow-md transition text-center">
+      <div class="text-2xl font-bold text-red-600">{{ tasks.filter(t => t.Status.toLowerCase() === 'failed').length }}</div>
+      <div class="text-sm text-gray-500 mt-1">失败</div>
+    </div>
+  </div>
+
+  <div class="w-full bg-white rounded-xl p-5 border border-gray-200/80 shadow-xs space-y-4">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="text-xs text-gray-400 bg-slate-50 uppercase border-b border-gray-200">
+          <tr>
+            <th class="py-3 px-4 font-semibold">任务 ID</th>
+            <th class="py-3 px-4 font-semibold">流程</th>
+            <th class="py-3 px-4 font-semibold">开始时间</th>
+            <th class="py-3 px-4 font-semibold">耗时</th>
+            <th class="py-3 px-4 font-semibold text-center">状态</th>
+            <th class="py-3 px-4 font-semibold text-center">操作</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="task in filteredTasks" :key="task.Task_ID" class="hover:bg-slate-50/80 transition">
+            <td class="py-3 px-4 font-mono font-medium text-gray-700 text-xs">{{ task.Task_ID }}</td>
+            <td class="py-3 px-4 font-medium text-gray-800 text-xs">{{ task.Pipeline }}</td>
+            <td class="py-3 px-4 text-gray-500 text-xs">{{ task.Start_Time }}</td>
+            <td class="py-3 px-4 text-gray-600 font-mono text-xs">{{ task.Duration_Str }}</td>
+            <td class="py-3 px-4 text-center" v-html="renderStatusChip(task.Status)"></td>
+            <td class="py-3 px-4 text-center">
+              <div class="flex items-center justify-center gap-1">
+                <button @click="openDetails(task)" title="详情" class="p-1 rounded hover:bg-blue-50 text-blue-600"><span class="material-icons md-18">expand_more</span></button>
+                <button @click="openReport(task)" title="报告" class="p-1 rounded hover:bg-indigo-50 text-indigo-600"><span class="material-icons md-18">description</span></button>
+                <button @click="openLogs(task)" title="日志" class="p-1 rounded hover:bg-purple-50 text-purple-600"><span class="material-icons md-18">article</span></button>
+                <button @click="rerunTask(task)" title="重跑" class="p-1 rounded hover:bg-green-50 text-green-600"><span class="material-icons md-18">replay</span></button>
+                <button @click="deleteTask(task.Task_ID)" title="删除" class="p-1 rounded hover:bg-red-50 text-red-600"><span class="material-icons md-18">delete</span></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar-drawer');
+      if (sb) sb.classList.toggle('sidebar-collapsed');
+    }
+  </script>
+  
+<script>
+  const { createApp, ref, computed } = Vue;
+  createApp({
+    setup() {
+      const filter = ref('all');
+      const tasks = ref([
+        { Task_ID: 'TASK_20260825_161526', Pipeline: 'Bulk RNA-Seq', Start_Time: '2026-08-25 16:15:26', Duration_Str: '28m 16s', Status: 'Success' },
+        { Task_ID: 'TASK_20260825_142010', Pipeline: 'scRNA Downstream', Start_Time: '2026-08-25 14:20:10', Duration_Str: '49m 04s', Status: 'Success' },
+        { Task_ID: 'TASK_20260824_101205', Pipeline: 'SAW Count', Start_Time: '2026-08-24 10:12:05', Duration_Str: '4h 35m', Status: 'Success' },
+        { Task_ID: 'TASK_20260823_190412', Pipeline: 'DNBC4tools RNA', Start_Time: '2026-08-23 19:04:12', Duration_Str: '1h 12m', Status: 'Success' },
+        { Task_ID: 'TASK_20260822_091533', Pipeline: 'Bulk RNA-Seq', Start_Time: '2026-08-22 09:15:33', Duration_Str: '24m 50s', Status: 'Success' },
+      ]);
+      const filteredTasks = computed(() => {
+        if (filter.value === 'all') return tasks.value;
+        return tasks.value.filter(t => t.Status.toLowerCase() === filter.value);
+      });
+      const renderStatusChip = (s) => {
+        const c = s.toLowerCase() === 'success' ? '#D1FAE5;color:#065F46' : '#FEF3C7;color:#92400E';
+        return `<span style="background:${c};padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600">${s}</span>`;
+      };
+      const openDetails = (t) => alert(`任务详情: ${t.Task_ID}\n流程: ${t.Pipeline}\n配置: 32 Cores | GRCh38 | DESeq2`);
+      const openReport = (t) => alert(`正在打开任务 ${t.Task_ID} 的 HTML 分析交付报告...`);
+      const openLogs = (t) => alert(`[LOG] Task ${t.Task_ID}\n[INFO] Rule fastp -> hisat2 -> featureCounts -> deseq2 -> Done!`);
+      const rerunTask = (t) => alert(`任务 ${t.Task_ID} 已加入 Celery 重新执行！`);
+      const deleteTask = (id) => { if(confirm(`确认删除任务 ${id}？`)) tasks.value = tasks.value.filter(t => t.Task_ID !== id); };
+      return { filter, tasks, filteredTasks, renderStatusChip, openDetails, openReport, openLogs, rerunTask, deleteTask };
+    }
+  }).mount('#app');
+</script>
+
+</body>
+</html>

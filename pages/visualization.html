@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>可视化分析 - 医学共享平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            indigo: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA' },
+            saw: '#5F1785',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .material-icons { font-size: 20px; vertical-align: middle; }
+    .material-icons.md-18 { font-size: 18px; }
+    .material-icons.md-24 { font-size: 24px; }
+    .material-icons.md-36 { font-size: 36px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-collapsed { width: 5rem !important; }
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+  </style>
+  
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+    
+    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
+      <div class="flex items-center">
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
+          <span class="material-icons">menu</span>
+        </button>
+        <a href="../index.html" class="text-xl font-bold ml-2 text-indigo-600 tracking-tight no-underline">医学共享平台</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-medium">后端正常</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="flex-1 flex overflow-hidden">
+      
+    <!-- 侧边栏抽屉 (对齐 frontend/main.py: left_drawer) -->
+    <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
+      <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div class="flex items-center gap-2 mb-4 px-2">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="text-sm font-bold text-gray-600 sidebar-label">Welcome!</span>
+        </div>
+
+        
+        <a href="../index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">home</span>
+          <span class="sidebar-label">首页</span>
+        </a>
+        
+        <a href="history.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">history</span>
+          <span class="sidebar-label">历史任务</span>
+        </a>
+        
+        <a href="pipeline.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">biotech</span>
+          <span class="sidebar-label">分析流程</span>
+        </a>
+        
+        <a href="visualization.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <span class="material-icons text-indigo-600">pie_chart</span>
+          <span class="sidebar-label">可视化</span>
+        </a>
+        
+        <a href="chat_biomni.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">smart_toy</span>
+          <span class="sidebar-label">Chat-Biomni</span>
+        </a>
+        
+
+        <div class="flex-1"></div>
+        <div class="my-2 border-t border-gray-100"></div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs text-gray-500 font-medium sidebar-label">后端正常</span>
+        </div>
+      </div>
+    </aside>
+    
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
+        
+<div class="w-full max-w-7xl mx-auto space-y-6">
+  <div class="w-full bg-indigo-600 text-white rounded-2xl px-6 py-4 shadow-md">
+    <h1 class="text-2xl font-bold">可视化分析</h1>
+  </div>
+
+  <div class="w-full bg-white rounded-xl p-6 shadow-xs border border-gray-200/80 space-y-4">
+    <div class="flex items-center gap-2">
+      <span class="material-icons text-indigo-500">pie_chart</span>
+      <span class="text-lg font-bold">通用绘图工具</span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div @click="activeModal = 'volcano'; initVolcano()" class="rounded-xl p-4 border border-gray-200 cursor-pointer hover:shadow-lg hover:-translate-y-1 hover:border-indigo-200 transition-all duration-300 flex flex-col items-center gap-3 text-center bg-white">
+        <span class="material-icons md-36 text-red-500">local_fire_department</span>
+        <span class="text-base font-bold text-gray-800">火山图 (Volcano Plot)</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-green-100 text-green-800 font-semibold">立即使用</span>
+        <p class="text-xs text-gray-500">展示数值分布，支持交互式标注</p>
+      </div>
+
+      <div onclick="alert('热图模块已就绪，支持 R pheatmap 聚类！')" class="rounded-xl p-4 border border-gray-200 cursor-pointer hover:shadow-lg hover:-translate-y-1 hover:border-indigo-200 transition-all duration-300 flex flex-col items-center gap-3 text-center bg-white">
+        <span class="material-icons md-36 text-indigo-600">grid_on</span>
+        <span class="text-base font-bold text-gray-800">热图 (Heatmap)</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-green-100 text-green-800 font-semibold">立即使用</span>
+        <p class="text-xs text-gray-500">展示矩阵数值的聚类热图</p>
+      </div>
+
+      <div onclick="alert('小提琴图模块已就绪，支持 ggplot2 分组！')" class="rounded-xl p-4 border border-gray-200 cursor-pointer hover:shadow-lg hover:-translate-y-1 hover:border-indigo-200 transition-all duration-300 flex flex-col items-center gap-3 text-center bg-white">
+        <span class="material-icons md-36 text-amber-500">graphic_eq</span>
+        <span class="text-base font-bold text-gray-800">小提琴图 (Violin Plot)</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-green-100 text-green-800 font-semibold">立即使用</span>
+        <p class="text-xs text-gray-500">展示数据分布与统计特征</p>
+      </div>
+
+      <div onclick="alert('韦恩图模块已就绪，支持集合位图计算！')" class="rounded-xl p-4 border border-gray-200 cursor-pointer hover:shadow-lg hover:-translate-y-1 hover:border-indigo-200 transition-all duration-300 flex flex-col items-center gap-3 text-center bg-white">
+        <span class="material-icons md-36 text-purple-600">compare</span>
+        <span class="text-base font-bold text-gray-800">韦恩图 (Venn Diagram)</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-green-100 text-green-800 font-semibold">立即使用</span>
+        <p class="text-xs text-gray-500">展示集合交集与差异</p>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="activeModal === 'volcano'" class="w-full bg-white rounded-xl p-6 shadow-xs border border-gray-200/80 space-y-4">
+    <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+      <h3 class="font-bold text-base flex items-center gap-2 text-gray-800">
+        <span class="material-icons text-red-500">local_fire_department</span> 火山图 WebGL 在线交互
+      </h3>
+      <button @click="activeModal = null" class="text-gray-400 hover:text-gray-600"><span class="material-icons">close</span></button>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="font-semibold block mb-1">|Log2FC| 阈值: {{ fc }}</label>
+          <input type="range" v-model="fc" @input="redraw" min="0.5" max="3.0" step="0.1" class="w-full" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">-Log10(P-value) 阈值: {{ pval }}</label>
+          <input type="range" v-model="pval" @input="redraw" min="1.0" max="6.0" step="0.2" class="w-full" />
+        </div>
+      </div>
+      <div class="lg:col-span-2">
+        <div id="sub-volcano-chart" style="width:100%; height:450px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar-drawer');
+      if (sb) sb.classList.toggle('sidebar-collapsed');
+    }
+  </script>
+  
+<script>
+  const { createApp, ref, nextTick } = Vue;
+  createApp({
+    setup() {
+      const activeModal = ref(null);
+      const fc = ref(1.0);
+      const pval = ref(2.0);
+      const initVolcano = () => { nextTick(() => redraw()); };
+      const redraw = () => {
+        const c = document.getElementById('sub-volcano-chart');
+        if (!c) return;
+        const up = { x: [1.8, 2.4, 3.1, 2.1, 1.5], y: [4.5, 6.2, 7.1, 5.3, 3.8], text: ['CXCL8', 'IL6', 'MMP9', 'VEGFA', 'TNF'], mode: 'markers', name: 'UP', marker: { color: '#EF4444', size: 8 } };
+        const down = { x: [-1.9, -2.5, -1.6, -2.8], y: [4.2, 5.8, 3.9, 6.5], text: ['CDKN2A', 'PTEN', 'TP53', 'RB1'], mode: 'markers', name: 'DOWN', marker: { color: '#3B82F6', size: 8 } };
+        Plotly.newPlot(c, [up, down], { title: '差异基因火山图', margin: { l: 40, r: 20, t: 40, b: 40 } }, { responsive: true, displaylogo: false });
+      };
+      return { activeModal, fc, pval, initVolcano, redraw };
+    }
+  }).mount('#app');
+</script>
+
+</body>
+</html>

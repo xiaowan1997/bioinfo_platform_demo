@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>分析流程 - 医学共享平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            indigo: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA' },
+            saw: '#5F1785',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .material-icons { font-size: 20px; vertical-align: middle; }
+    .material-icons.md-18 { font-size: 18px; }
+    .material-icons.md-24 { font-size: 24px; }
+    .material-icons.md-36 { font-size: 36px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-collapsed { width: 5rem !important; }
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+  </style>
+  
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+    
+    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
+      <div class="flex items-center">
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
+          <span class="material-icons">menu</span>
+        </button>
+        <a href="../index.html" class="text-xl font-bold ml-2 text-indigo-600 tracking-tight no-underline">医学共享平台</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-medium">后端正常</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="flex-1 flex overflow-hidden">
+      
+    <!-- 侧边栏抽屉 (对齐 frontend/main.py: left_drawer) -->
+    <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
+      <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div class="flex items-center gap-2 mb-4 px-2">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="text-sm font-bold text-gray-600 sidebar-label">Welcome!</span>
+        </div>
+
+        
+        <a href="../index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">home</span>
+          <span class="sidebar-label">首页</span>
+        </a>
+        
+        <a href="history.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">history</span>
+          <span class="sidebar-label">历史任务</span>
+        </a>
+        
+        <a href="pipeline.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="sidebar-label">分析流程</span>
+        </a>
+        
+        <a href="visualization.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">pie_chart</span>
+          <span class="sidebar-label">可视化</span>
+        </a>
+        
+        <a href="chat_biomni.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">smart_toy</span>
+          <span class="sidebar-label">Chat-Biomni</span>
+        </a>
+        
+
+        <div class="flex-1"></div>
+        <div class="my-2 border-t border-gray-100"></div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs text-gray-500 font-medium sidebar-label">后端正常</span>
+        </div>
+      </div>
+    </aside>
+    
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
+        
+<div class="w-full max-w-7xl mx-auto space-y-6">
+  <div class="w-full bg-indigo-600 text-white rounded-2xl px-6 py-4 shadow-md">
+    <h1 class="text-2xl font-bold">分析流程</h1>
+  </div>
+
+  <div class="w-full grid grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl p-4 text-center border border-gray-200/80 shadow-xs">
+      <div class="text-3xl font-bold text-indigo-600">8</div>
+      <div class="text-sm text-gray-500 font-medium mt-1">总流程数</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 text-center border border-gray-200/80 shadow-xs">
+      <div class="text-3xl font-bold text-indigo-600">8</div>
+      <div class="text-sm text-gray-500 font-medium mt-1">可用流程</div>
+    </div>
+    <div class="bg-white rounded-xl p-4 text-center border border-gray-200/80 shadow-xs">
+      <div class="text-3xl font-bold text-indigo-600">0</div>
+      <div class="text-sm text-gray-500 font-medium mt-1">开发中</div>
+    </div>
+  </div>
+
+  <div class="w-full bg-white rounded-xl p-5 border border-gray-200/80 shadow-xs space-y-6">
+    <div class="flex items-center gap-2">
+      <span class="material-icons text-indigo-500">biotech</span>
+      <span class="text-lg font-bold">可用流程矩阵</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-icons md-24 text-green-500">leaderboard</span>
+            <span class="text-xl font-bold">Bulk RNA-Seq</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 leading-relaxed">标准转录组分析流程，从原始测序数据到差异表达基因和功能富集分析</p>
+          <div class="space-y-2 mb-4 text-xs text-gray-600">
+            <div class="flex items-center gap-2"><span class="material-icons text-green-500 text-xs">verified</span><span>质量控制：fastp 去除低质量碱基和接头</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-green-500 text-xs">compare_arrows</span><span>序列比对：HISAT2 比对到参考基因组</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-green-500 text-xs">calculate</span><span>基因定量：featureCounts 统计表达矩阵</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-green-500 text-xs">trending_up</span><span>差异分析：DESeq2 鉴定差异基因</span></div>
+          </div>
+        </div>
+        <a href="bulk_rnaseq.html" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg text-sm flex items-center justify-center gap-1 transition no-underline shadow-xs">
+          <span class="material-icons md-18">play_arrow</span> 开始分析
+        </a>
+      </div>
+
+      <div class="rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-icons md-24 text-purple-500">scatter_plot</span>
+            <span class="text-xl font-bold">DNBC4tools RNA</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 leading-relaxed">基于 DNBelab C 系列技术的单细胞转录组分析，支持从原始 Fastq 到表达矩阵的完整流程</p>
+          <div class="space-y-2 mb-4 text-xs text-gray-600">
+            <div class="flex items-center gap-2"><span class="material-icons text-purple-500 text-xs">style</span><span>标签解析：解析 Cell Barcode 与 UMI 序列</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-purple-500 text-xs">compare_arrows</span><span>序列比对：STAR 比对到参考基因组</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-purple-500 text-xs">filter_alt</span><span>细胞识别：基于 EmptyDrops 算法识别真实细胞</span></div>
+          </div>
+        </div>
+        <a href="dnbc4tools_rna.html" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg text-sm flex items-center justify-center gap-1 transition no-underline shadow-xs">
+          <span class="material-icons md-18">play_arrow</span> 开始分析
+        </a>
+      </div>
+
+      <div class="rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-icons md-24 text-saw">grain</span>
+            <span class="text-xl font-bold">SAW Count (Stereo-seq)</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 leading-relaxed">Stereo-seq 空间转录组分析，支持空间 CID 定位、基因定量及 StereoMap 可视化</p>
+          <div class="space-y-2 mb-4 text-xs text-gray-600">
+            <div class="flex items-center gap-2"><span class="material-icons text-saw text-xs">crop_free</span><span>空间定位：解析 CID Barcode 与芯片 Mask 配准</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-saw text-xs">compare_arrows</span><span>序列比对：STAR 比对到参考基因组</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-saw text-xs">grid_on</span><span>表达矩阵：生成 Bin1 至 Bin100 多维空间矩阵</span></div>
+          </div>
+        </div>
+        <a href="saw_count.html" class="w-full text-white font-semibold py-2.5 rounded-lg text-sm flex items-center justify-center gap-1 transition no-underline shadow-xs" style="background-color: #5F1785;">
+          <span class="material-icons md-18">play_arrow</span> 开始分析
+        </a>
+      </div>
+
+      <div class="rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-all flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-icons md-24 text-blue-500">science</span>
+            <span class="text-xl font-bold">scRNA Downstream</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 leading-relaxed">单细胞下游分析流程，包含降维聚类、细胞自动化注释、组间差异比较及细胞通讯分析</p>
+          <div class="space-y-2 mb-4 text-xs text-gray-600">
+            <div class="flex items-center gap-2"><span class="material-icons text-blue-500 text-xs">tune</span><span>去双细胞：DoubletFinder 精准过滤</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-blue-500 text-xs">hub</span><span>批次整合：Harmony 多样本去批次</span></div>
+            <div class="flex items-center gap-2"><span class="material-icons text-blue-500 text-xs">label</span><span>细胞注释：SingleR 自动化细胞定型</span></div>
+          </div>
+        </div>
+        <a href="sc_downstream.html" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm flex items-center justify-center gap-1 transition no-underline shadow-xs">
+          <span class="material-icons md-18">play_arrow</span> 开始分析
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar-drawer');
+      if (sb) sb.classList.toggle('sidebar-collapsed');
+    }
+  </script>
+  
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNBC4tools VDJ - 医学共享平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            indigo: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA' },
+            saw: '#5F1785',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .material-icons { font-size: 20px; vertical-align: middle; }
+    .material-icons.md-18 { font-size: 18px; }
+    .material-icons.md-24 { font-size: 24px; }
+    .material-icons.md-36 { font-size: 36px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-collapsed { width: 5rem !important; }
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+  </style>
+  
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+    
+    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
+      <div class="flex items-center">
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
+          <span class="material-icons">menu</span>
+        </button>
+        <a href="../index.html" class="text-xl font-bold ml-2 text-indigo-600 tracking-tight no-underline">医学共享平台</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-medium">后端正常</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="flex-1 flex overflow-hidden">
+      
+    <!-- 侧边栏抽屉 (对齐 frontend/main.py: left_drawer) -->
+    <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
+      <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div class="flex items-center gap-2 mb-4 px-2">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="text-sm font-bold text-gray-600 sidebar-label">Welcome!</span>
+        </div>
+
+        
+        <a href="../index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">home</span>
+          <span class="sidebar-label">首页</span>
+        </a>
+        
+        <a href="history.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">history</span>
+          <span class="sidebar-label">历史任务</span>
+        </a>
+        
+        <a href="pipeline.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="sidebar-label">分析流程</span>
+        </a>
+        
+        <a href="visualization.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">pie_chart</span>
+          <span class="sidebar-label">可视化</span>
+        </a>
+        
+        <a href="chat_biomni.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">smart_toy</span>
+          <span class="sidebar-label">Chat-Biomni</span>
+        </a>
+        
+
+        <div class="flex-1"></div>
+        <div class="my-2 border-t border-gray-100"></div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs text-gray-500 font-medium sidebar-label">后端正常</span>
+        </div>
+      </div>
+    </aside>
+    
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
+        
+<div class="w-full max-w-7xl mx-auto space-y-6">
+  <div class="w-full bg-rose-600 text-white rounded-2xl px-6 py-4 shadow-md flex items-center gap-3">
+    <span class="material-icons md-36 opacity-90">hub</span>
+    <div>
+      <h1 class="text-2xl font-bold">DNBC4tools VDJ 单细胞免疫受体库分析</h1>
+      <p class="text-sm opacity-80 mt-0.5">DNBelab C 系列 scVDJ-seq · TCR/BCR 免疫球蛋白多样性与克隆型鉴定</p>
+    </div>
+  </div>
+  <div class="w-full bg-white rounded-xl p-6 shadow-xs border border-gray-200/80 space-y-4 text-xs">
+    <h3 class="font-bold text-gray-800 text-base flex items-center gap-2">
+      <span class="material-icons text-rose-600">tune</span> 免疫受体库链型与参数配置
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">受体库类型 (Chain Type)</label>
+        <select class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white"><option>TCR (TRA / TRB)</option><option>BCR (Heavy / Light)</option><option>Auto (自动识别)</option></select>
+      </div>
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">物种参考库</label>
+        <select class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white"><option>Human (IMGT)</option><option>Mouse (IMGT)</option></select>
+      </div>
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">并发线程数 (threads)</label>
+        <input type="number" value="16" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
+      </div>
+    </div>
+    <div class="pt-4 flex justify-end">
+      <button onclick="alert('已提交 DNBC4tools VDJ 任务！正在跳转至历史任务...'); window.location.href='history.html';" class="bg-rose-600 hover:bg-rose-700 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md transition flex items-center gap-2">
+        <span class="material-icons md-18">play_arrow</span><span>提交分析</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar-drawer');
+      if (sb) sb.classList.toggle('sidebar-collapsed');
+    }
+  </script>
+  
+</body>
+</html>

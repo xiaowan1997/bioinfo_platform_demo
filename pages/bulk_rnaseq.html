@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulk RNA-Seq 分析流程 - 医学共享平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            indigo: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA' },
+            saw: '#5F1785',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .material-icons { font-size: 20px; vertical-align: middle; }
+    .material-icons.md-18 { font-size: 18px; }
+    .material-icons.md-24 { font-size: 24px; }
+    .material-icons.md-36 { font-size: 36px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-collapsed { width: 5rem !important; }
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+  </style>
+  
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+    
+    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
+      <div class="flex items-center">
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
+          <span class="material-icons">menu</span>
+        </button>
+        <a href="../index.html" class="text-xl font-bold ml-2 text-indigo-600 tracking-tight no-underline">医学共享平台</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-medium">后端正常</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="flex-1 flex overflow-hidden">
+      
+    <!-- 侧边栏抽屉 (严格对齐 frontend/main.py: left_drawer) -->
+    <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
+      <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div class="flex items-center gap-2 mb-4 px-2">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="text-sm font-bold text-gray-600 sidebar-label">Welcome!</span>
+        </div>
+
+        
+        <a href="../index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">home</span>
+          <span class="sidebar-label">首页</span>
+        </a>
+        
+        <a href="history.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">history</span>
+          <span class="sidebar-label">历史任务</span>
+        </a>
+        
+        <a href="pipeline.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="sidebar-label">分析流程</span>
+        </a>
+        
+        <a href="visualization.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">pie_chart</span>
+          <span class="sidebar-label">可视化</span>
+        </a>
+        
+        <a href="chat_biomni.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">smart_toy</span>
+          <span class="sidebar-label">Chat-Biomni</span>
+        </a>
+        
+
+        <div class="flex-1"></div>
+        <div class="my-2 border-t border-gray-100"></div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs text-gray-500 font-medium sidebar-label">后端正常</span>
+        </div>
+      </div>
+    </aside>
+    
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
+        
+<div class="w-full max-w-7xl mx-auto gap-6 p-2 space-y-6">
+  <!-- 页面标题 -->
+  <div class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl px-6 py-4 shadow-md flex items-center gap-3">
+    <span class="material-icons md-36 opacity-90">leaderboard</span>
+    <div>
+      <h1 class="text-2xl font-bold">Bulk RNA-Seq 分析流程</h1>
+      <p class="text-sm opacity-80 mt-1">标准转录组分析 · 从原始数据到差异表达与功能富集</p>
+    </div>
+  </div>
+
+  <!-- 1. 样本配置 -->
+  <div class="w-full bg-white rounded-xl p-6 shadow-sm border border-gray-200/80 space-y-3">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <span class="material-icons text-green-500">table_chart</span>
+        <span class="text-base font-bold text-gray-800">样本信息配置</span>
+      </div>
+      
+      <div class="flex gap-2">
+        <button @click="downloadTemplate" class="px-3 py-1.5 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 font-semibold text-xs flex items-center gap-1">
+          <span class="material-icons md-18">download</span> 下载模板
+        </button>
+        <button @click="uploadConfig" class="px-3 py-1.5 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 font-semibold text-xs flex items-center gap-1">
+          <span class="material-icons md-18">upload</span> 上传配置
+        </button>
+        <button @click="addRow" class="px-3 py-1.5 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 font-semibold text-xs flex items-center gap-1">
+          <span class="material-icons md-18">add</span> 添加样本
+        </button>
+        <button @click="deleteSelected" class="px-3 py-1.5 border border-red-500 text-red-600 rounded-lg hover:bg-red-50 font-semibold text-xs flex items-center gap-1">
+          <span class="material-icons md-18">delete</span> 删除选中
+        </button>
+      </div>
+    </div>
+
+    <p class="text-sm text-gray-500 mb-2">点击输入框直接编辑。支持绝对路径。</p>
+
+    <div class="w-full flex items-center gap-4 mb-2">
+      <input v-model="taskName" placeholder="任务名称 (可选，留空则自动生成)" class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 max-w-md focus:ring-1 focus:ring-indigo-500 focus:outline-none" />
+      <div class="flex items-center gap-1 text-xs text-gray-400">
+        <span class="material-icons md-18 text-gray-400">info</span>
+        <span>自定义名称将作为结果文件夹名</span>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto border border-gray-200 rounded-xl">
+      <table class="w-full text-left font-mono text-sm">
+        <thead class="bg-slate-50 text-gray-600 uppercase border-b border-gray-200 text-xs font-semibold">
+          <tr>
+            <th class="p-3 w-10 text-center"><input type="checkbox" @change="toggleSelectAll" /></th>
+            <th class="p-3">样本名称 (sample)</th>
+            <th class="p-3">分组 (group)</th>
+            <th class="p-3">Read1 路径 (fq1)</th>
+            <th class="p-3">Read2 路径 (fq2)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="row in rows" :key="row.id" class="hover:bg-slate-50/60">
+            <td class="p-3 text-center"><input type="checkbox" v-model="row.selected" /></td>
+            <td class="p-2"><input v-model="row.sample" class="w-full px-2 py-1.5 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-xs" /></td>
+            <td class="p-2"><input v-model="row.group" class="w-full px-2 py-1.5 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-xs" /></td>
+            <td class="p-2"><input v-model="row.fq1" class="w-full px-2 py-1.5 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-xs" /></td>
+            <td class="p-2"><input v-model="row.fq2" class="w-full px-2 py-1.5 border border-transparent hover:border-gray-200 focus:border-indigo-500 rounded bg-transparent focus:bg-white text-xs" /></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="text-xs text-gray-500 mt-1">当前样本数: {{ rows.length }}</div>
+  </div>
+
+  <!-- 2. 分析参数 (含折叠的高级参数) -->
+  <div class="w-full bg-white rounded-xl p-5 border border-gray-200/80 shadow-xs space-y-4">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="material-icons text-green-500">tune</span>
+      <span class="text-base font-bold text-gray-800">分析参数设置</span>
+    </div>
+
+    <div class="w-full flex gap-6 flex-wrap">
+      <!-- 基础参数 -->
+      <div class="flex flex-col gap-3 flex-1 min-w-48">
+        <label class="text-sm font-semibold text-gray-600">基础参数</label>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">样本物种</label>
+          <select v-model="params.species" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white">
+            <option value="hsa">Human (hsa)</option>
+            <option value="mmu">Mouse (mmu)</option>
+            <option value="rno">Rat (rno)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">差异分析工具</label>
+          <select v-model="params.tool" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white">
+            <option value="DESeq2">DESeq2</option>
+            <option value="edgeR">edgeR</option>
+            <option value="limma">limma</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 对照组与阈值 -->
+      <div class="flex flex-col gap-3 flex-1 min-w-48">
+        <label class="text-sm font-semibold text-gray-600">对照组与阈值</label>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">对照组名称</label>
+          <select v-model="params.ctrlGroup" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white">
+            <option value="Control">Control</option>
+            <option value="Treat1">Treat1</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">Padj (FDR) 阈值</label>
+          <input type="number" v-model="params.padj" step="0.01" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">Log2FoldChange 阈值</label>
+          <input type="number" v-model="params.lfc" step="0.5" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" />
+        </div>
+      </div>
+
+      <!-- 富集分析 -->
+      <div class="flex flex-col gap-3 flex-1 min-w-48">
+        <label class="text-sm font-semibold text-gray-600">富集分析</label>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">数据库（可多选）</label>
+          <div class="flex gap-3 text-xs mt-2">
+            <label class="flex items-center gap-1.5"><input type="checkbox" checked /> GO</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" checked /> KEGG</label>
+          </div>
+        </div>
+        <div class="mt-2">
+          <label class="text-xs text-gray-500 block mb-1">分析方法（可多选）</label>
+          <div class="flex gap-3 text-xs mt-2">
+            <label class="flex items-center gap-1.5"><input type="checkbox" checked /> ORA</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" checked /> GSEA</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 折叠的高级参数 (对齐 bulk_rnaseq.py: L227-235: ui.expansion("高级参数")) -->
+    <details class="w-full mt-4 border border-gray-200 rounded-xl overflow-hidden group">
+      <summary class="px-4 py-3 bg-slate-50 hover:bg-slate-100 cursor-pointer flex items-center justify-between text-sm font-semibold text-gray-700 select-none">
+        <div class="flex items-center gap-2">
+          <span class="material-icons text-gray-500">settings</span>
+          <span>高级参数</span>
+        </div>
+        <span class="material-icons text-gray-400 group-open:rotate-180 transition-transform">expand_more</span>
+      </summary>
+      <div class="p-4 bg-white border-t border-gray-200 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+        <div class="space-y-3">
+          <div>
+            <label class="font-medium text-gray-600 block mb-1">热图展示基因数</label>
+            <input type="number" value="50" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
+          </div>
+          <div>
+            <label class="font-medium text-gray-600 block mb-1">低表达过滤阈值 (min_dr)</label>
+            <input type="number" value="0.25" step="0.05" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="font-medium text-gray-600 block mb-1">R1 接头序列</label>
+            <input value="AAGTCGGAGGCCAAGCGGTCTTAGGAAGACAA" class="w-full px-3 py-2 border border-gray-200 rounded-lg font-mono" />
+          </div>
+          <div>
+            <label class="font-medium text-gray-600 block mb-1">R2 接头序列</label>
+            <input value="AAGTCGGATCGTAGCCATGTCGTTCTGTGAGCCAAGGAGTTG" class="w-full px-3 py-2 border border-gray-200 rounded-lg font-mono" />
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div class="pt-4 flex justify-end">
+      <button @click="submitPipeline" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md transition flex items-center gap-2">
+        <span class="material-icons md-18">play_arrow</span>
+        <span>提交分析任务 (Run Snakemake)</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar-drawer');
+      if (sb) sb.classList.toggle('sidebar-collapsed');
+    }
+  </script>
+  
+<script>
+  const { createApp, ref } = Vue;
+  createApp({
+    setup() {
+      const taskName = ref('');
+      const rows = ref([
+        { id: 1, selected: false, sample: 'Control_1', group: 'Control', fq1: '/path/to/Control_1_R1.fq.gz', fq2: '/path/to/Control_1_R2.fq.gz' },
+        { id: 2, selected: false, sample: 'Control_2', group: 'Control', fq1: '/path/to/Control_2_R1.fq.gz', fq2: '/path/to/Control_2_R2.fq.gz' },
+        { id: 3, selected: false, sample: 'Treat1_1',  group: 'Treat1',  fq1: '/path/to/Treat1_1_R1.fq.gz',  fq2: '/path/to/Treat1_1_R2.fq.gz' },
+        { id: 4, selected: false, sample: 'Treat1_2',  group: 'Treat1',  fq1: '/path/to/Treat1_2_R1.fq.gz',  fq2: '/path/to/Treat1_2_R2.fq.gz' },
+      ]);
+      const params = ref({ species: 'hsa', tool: 'DESeq2', ctrlGroup: 'Control', padj: 0.05, lfc: 1.0 });
+
+      const downloadTemplate = () => alert('已触发 sample_template.csv 模板下载！');
+      const uploadConfig = () => alert('已模拟解析 CSV 配置文件！导入 4 条样本数据。');
+      const addRow = () => {
+        const id = rows.value.length + 1;
+        rows.value.push({ id, selected: false, sample: `Sample_${id}`, group: 'Treat1', fq1: `/path/to/S${id}_1.fq.gz`, fq2: `/path/to/S${id}_2.fq.gz` });
+      };
+      const deleteSelected = () => {
+        rows.value = rows.value.filter(r => !r.selected);
+      };
+      const toggleSelectAll = (e) => {
+        const checked = e.target.checked;
+        rows.value.forEach(r => r.selected = checked);
+      };
+      const submitPipeline = () => {
+        alert('🎉 任务已成功提交至 Celery 异步队列！正在跳转至历史任务管理页...');
+        window.location.href = 'history.html';
+      };
+
+      return { taskName, rows, params, downloadTemplate, uploadConfig, addRow, deleteSelected, toggleSelectAll, submitPipeline };
+    }
+  }).mount('#app');
+</script>
+
+</body>
+</html>

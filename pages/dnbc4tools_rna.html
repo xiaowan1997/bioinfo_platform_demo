@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DNBC4tools RNA - 医学共享平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            indigo: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA' },
+            saw: '#5F1785',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .material-icons { font-size: 20px; vertical-align: middle; }
+    .material-icons.md-18 { font-size: 18px; }
+    .material-icons.md-24 { font-size: 24px; }
+    .material-icons.md-36 { font-size: 36px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-collapsed { width: 5rem !important; }
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+  </style>
+  
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+    
+    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
+      <div class="flex items-center">
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
+          <span class="material-icons">menu</span>
+        </button>
+        <a href="../index.html" class="text-xl font-bold ml-2 text-indigo-600 tracking-tight no-underline">医学共享平台</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-medium">后端正常</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="flex-1 flex overflow-hidden">
+      
+    <!-- 侧边栏抽屉 (严格对齐 frontend/main.py: left_drawer) -->
+    <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
+      <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div class="flex items-center gap-2 mb-4 px-2">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="text-sm font-bold text-gray-600 sidebar-label">Welcome!</span>
+        </div>
+
+        
+        <a href="../index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">home</span>
+          <span class="sidebar-label">首页</span>
+        </a>
+        
+        <a href="history.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">history</span>
+          <span class="sidebar-label">历史任务</span>
+        </a>
+        
+        <a href="pipeline.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="sidebar-label">分析流程</span>
+        </a>
+        
+        <a href="visualization.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">pie_chart</span>
+          <span class="sidebar-label">可视化</span>
+        </a>
+        
+        <a href="chat_biomni.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">smart_toy</span>
+          <span class="sidebar-label">Chat-Biomni</span>
+        </a>
+        
+
+        <div class="flex-1"></div>
+        <div class="my-2 border-t border-gray-100"></div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs text-gray-500 font-medium sidebar-label">后端正常</span>
+        </div>
+      </div>
+    </aside>
+    
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
+        
+<div class="w-full max-w-7xl mx-auto gap-6 p-2 space-y-6">
+  <!-- 页面标题 -->
+  <div class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl px-6 py-4 shadow-md flex items-center gap-3">
+    <span class="material-icons md-36 opacity-90">scatter_plot</span>
+    <div>
+      <h1 class="text-2xl font-bold">Single Cell RNA-Seq 分析 (DNBC4tools)</h1>
+      <p class="text-sm opacity-80 mt-1">基于 DNBelab C 系列技术 · 多样本批处理支持</p>
+    </div>
+  </div>
+
+  <!-- 1. 样本配置表格 -->
+  <div class="w-full bg-white rounded-xl p-6 shadow-sm border border-gray-200/80 space-y-3">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <span class="material-icons text-purple-500">table_chart</span>
+        <span class="text-base font-bold text-gray-800">样本信息配置</span>
+      </div>
+      
+      <div class="flex gap-2">
+        <button onclick="alert('已下载 dnbc4_rna_template.csv 模板！')" class="px-3 py-1.5 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 font-semibold text-xs flex items-center gap-1">
+          <span class="material-icons md-18">download</span> 下载模板
+        </button>
+        <button onclick="alert('成功解析并导入 2 条单细胞样本！')" class="px-3 py-1.5 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 font-semibold text-xs flex items-center gap-1">
+          <span class="material-icons md-18">upload</span> 上传配置
+        </button>
+        <button @click="addRow" class="px-3 py-1.5 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 font-semibold text-xs flex items-center gap-1">
+          <span class="material-icons md-18">add</span> 添加样本
+        </button>
+      </div>
+    </div>
+
+    <p class="text-sm text-gray-500 mb-2">多路径请用逗号(,)分隔。一行代表一个样本。</p>
+
+    <div class="w-full flex items-center gap-4 mb-2">
+      <input placeholder="分析任务名称 (可选)" class="px-3 py-2 border border-gray-300 rounded-lg text-sm flex-1 max-w-md focus:ring-1 focus:ring-indigo-500 focus:outline-none" />
+    </div>
+
+    <div class="overflow-x-auto border border-gray-200 rounded-xl">
+      <table class="w-full text-left font-mono text-xs">
+        <thead class="bg-slate-50 text-gray-600 uppercase border-b border-gray-200 font-semibold">
+          <tr>
+            <th class="p-2.5">样本 ID</th>
+            <th class="p-2.5">物种</th>
+            <th class="p-2.5">cDNA R1</th>
+            <th class="p-2.5">cDNA R2</th>
+            <th class="p-2.5">Oligo R1</th>
+            <th class="p-2.5">Oligo R2</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="r in rows" :key="r.id" class="hover:bg-slate-50/60">
+            <td class="p-2"><input v-model="r.sample" class="w-full px-2 py-1 border border-gray-200 rounded" /></td>
+            <td class="p-2">
+              <select v-model="r.species" class="w-full px-2 py-1 border border-gray-200 rounded bg-white">
+                <option>Mouse</option><option>Human</option><option>Rat</option>
+              </select>
+            </td>
+            <td class="p-2"><input v-model="r.cdna_r1" class="w-full px-2 py-1 border border-gray-200 rounded" /></td>
+            <td class="p-2"><input v-model="r.cdna_r2" class="w-full px-2 py-1 border border-gray-200 rounded" /></td>
+            <td class="p-2"><input v-model="r.oligo_r1" class="w-full px-2 py-1 border border-gray-200 rounded" /></td>
+            <td class="p-2"><input v-model="r.oligo_r2" class="w-full px-2 py-1 border border-gray-200 rounded" /></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2. 全局参数 (含两行核心参数与高级折叠) -->
+  <div class="w-full bg-white rounded-xl p-5 shadow-sm border border-gray-200/80 space-y-4 text-xs">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="material-icons text-purple-500">tune</span>
+      <span class="text-base font-bold text-gray-800">全局分析参数</span>
+    </div>
+
+    <!-- 第一行：常用核心参数 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">CPU 线程数</label>
+        <input type="number" value="32" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
+      </div>
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">预期细胞数 (--expectcells)</label>
+        <input type="number" value="3000" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
+      </div>
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">试剂盒版本 (--chemistry)</label>
+        <select class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white">
+          <option>auto</option><option>scRNAv1HT</option><option>scRNAv2HT</option><option>scRNAv3HT</option>
+        </select>
+      </div>
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">暗循环设置 (--darkreaction)</label>
+        <select class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white">
+          <option>auto</option><option>R1</option><option>R2</option><option>R1R2</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 第二行：高级过滤/采样 -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">最小 UMI 数 (--minumi)</label>
+        <input type="number" value="1000" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
+      </div>
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">强制细胞数 (--forcecells)</label>
+        <input placeholder="不填则自动" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
+      </div>
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">下采样 Read 对数</label>
+        <input placeholder="不填则分析全部" class="w-full px-3 py-2 border border-gray-200 rounded-lg" />
+      </div>
+      <div>
+        <label class="font-semibold text-gray-700 block mb-1">细胞识别方法</label>
+        <select class="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white">
+          <option>emptydrops</option><option>barcoderanks</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="pt-4 flex justify-end">
+      <button onclick="alert('已提交 DNBC4tools RNA 任务！正在跳转至历史任务...'); window.location.href='history.html';" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-bold text-sm shadow-md transition flex items-center gap-2">
+        <span class="material-icons md-18">play_arrow</span>
+        <span>提交单细胞分析 (Submit Task)</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar-drawer');
+      if (sb) sb.classList.toggle('sidebar-collapsed');
+    }
+  </script>
+  
+<script>
+  const { createApp, ref } = Vue;
+  createApp({
+    setup() {
+      const rows = ref([
+        { id: 1, sample: 'Sample_1', species: 'Mouse', cdna_r1: '/data/cDNA_R1.fq.gz', cdna_r2: '/data/cDNA_R2.fq.gz', oligo_r1: '/data/oligo_R1.fq.gz', oligo_r2: '/data/oligo_R2.fq.gz' }
+      ]);
+      const addRow = () => {
+        const id = rows.value.length + 1;
+        rows.value.push({ id, sample: `Sample_${id}`, species: 'Mouse', cdna_r1: '', cdna_r2: '', oligo_r1: '', oligo_r2: '' });
+      };
+      return { rows, addRow };
+    }
+  }).mount('#app');
+</script>
+
+</body>
+</html>

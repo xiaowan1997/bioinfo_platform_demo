@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>首页 - 医学共享平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            indigo: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA' },
+            saw: '#5F1785',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .material-icons { font-size: 20px; vertical-align: middle; }
+    .material-icons.md-18 { font-size: 18px; }
+    .material-icons.md-24 { font-size: 24px; }
+    .material-icons.md-36 { font-size: 36px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-collapsed { width: 5rem !important; }
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+  </style>
+  
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+    
+    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
+      <div class="flex items-center">
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
+          <span class="material-icons">menu</span>
+        </button>
+        <a href="index.html" class="text-xl font-bold ml-2 text-indigo-600 tracking-tight no-underline">医学共享平台</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-medium">后端正常</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="flex-1 flex overflow-hidden">
+      
+    <!-- 侧边栏抽屉 (对齐 frontend/main.py: left_drawer) -->
+    <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
+      <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div class="flex items-center gap-2 mb-4 px-2">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="text-sm font-bold text-gray-600 sidebar-label">Welcome!</span>
+        </div>
+
+        
+        <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <span class="material-icons text-indigo-600">home</span>
+          <span class="sidebar-label">首页</span>
+        </a>
+        
+        <a href="pages/history.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">history</span>
+          <span class="sidebar-label">历史任务</span>
+        </a>
+        
+        <a href="pages/pipeline.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">biotech</span>
+          <span class="sidebar-label">分析流程</span>
+        </a>
+        
+        <a href="pages/visualization.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">pie_chart</span>
+          <span class="sidebar-label">可视化</span>
+        </a>
+        
+        <a href="pages/chat_biomni.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">smart_toy</span>
+          <span class="sidebar-label">Chat-Biomni</span>
+        </a>
+        
+
+        <div class="flex-1"></div>
+        <div class="my-2 border-t border-gray-100"></div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs text-gray-500 font-medium sidebar-label">后端正常</span>
+        </div>
+      </div>
+    </aside>
+    
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
+        
+<div class="w-full max-w-7xl mx-auto space-y-6">
+  <div class="w-full bg-indigo-600 text-white rounded-2xl p-6 shadow-md flex items-center justify-between">
+    <div class="space-y-1">
+      <h1 class="text-2xl font-bold tracking-tight">河南中医药大学测序数据分析平台</h1>
+      <p class="text-sm opacity-80 font-mono">Bioinfomation Platform</p>
+    </div>
+    <span class="bg-white text-indigo-600 font-bold text-sm px-3 py-1 rounded-full shadow-xs">1.0</span>
+  </div>
+
+  <!-- KPI -->
+  <div class="w-full grid grid-cols-2 md:grid-cols-4 gap-4">
+    <a href="pages/history.html" class="bg-white rounded-xl p-4 border border-gray-200/80 shadow-xs cursor-pointer hover:shadow-lg transition-all text-center no-underline">
+      <div class="text-3xl font-bold text-indigo-600">5</div>
+      <div class="text-sm text-gray-500 font-medium mt-1">总任务数</div>
+    </a>
+    <a href="pages/history.html" class="bg-white rounded-xl p-4 border border-gray-200/80 shadow-xs cursor-pointer hover:shadow-lg transition-all text-center no-underline">
+      <div class="text-3xl font-bold text-green-600">100.0%</div>
+      <div class="text-sm text-gray-500 font-medium mt-1">成功率</div>
+    </a>
+    <a href="pages/history.html" class="bg-white rounded-xl p-4 border border-gray-200/80 shadow-xs cursor-pointer hover:shadow-lg transition-all text-center no-underline">
+      <div class="text-3xl font-bold text-amber-600">0</div>
+      <div class="text-sm text-gray-500 font-medium mt-1">运行中</div>
+    </a>
+    <a href="pages/history.html" class="bg-white rounded-xl p-4 border border-gray-200/80 shadow-xs cursor-pointer hover:shadow-lg transition-all text-center no-underline">
+      <div class="text-3xl font-bold text-red-600">0</div>
+      <div class="text-sm text-gray-500 font-medium mt-1">失败任务</div>
+    </a>
+  </div>
+
+  <!-- 最近任务 -->
+  <div class="w-full bg-white rounded-xl p-5 border border-gray-200/80 shadow-xs space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-icons text-indigo-500">history</span>
+        <span class="text-lg font-bold text-gray-800">最近任务历史</span>
+      </div>
+      <a href="pages/history.html" class="text-xs text-indigo-600 hover:underline font-semibold no-underline">查看全量任务 &rarr;</a>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm">
+        <thead class="text-xs text-gray-400 bg-slate-50 uppercase border-y border-gray-100">
+          <tr>
+            <th class="py-3 px-4">任务 ID</th>
+            <th class="py-3 px-4">流程</th>
+            <th class="py-3 px-4">开始时间</th>
+            <th class="py-3 px-4 text-center">状态</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <tr v-for="t in tasks" :key="t.id" class="hover:bg-slate-50/80 transition">
+            <td class="py-3 px-4 font-mono font-medium text-gray-700 text-xs">{{ t.id }}</td>
+            <td class="py-3 px-4 font-medium text-gray-800 text-xs">{{ t.pipeline }}</td>
+            <td class="py-3 px-4 text-gray-500 text-xs">{{ t.time }}</td>
+            <td class="py-3 px-4 text-center">
+              <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Success</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 常用分析流程 -->
+  <div class="w-full bg-white rounded-xl p-5 border border-gray-200/80 shadow-xs space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-icons text-indigo-500">biotech</span>
+        <span class="text-lg font-bold text-gray-800">常用分析流程</span>
+      </div>
+      <a href="pages/pipeline.html" class="text-xs text-indigo-600 hover:underline font-semibold no-underline">全部 8 条流水线 &rarr;</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-all flex flex-col justify-between bg-white">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-icons md-24 text-green-500">leaderboard</span>
+            <span class="text-lg font-bold text-gray-800">Bulk RNA-Seq</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 leading-relaxed">标准转录组分析流程，从原始测序数据到差异表达基因和功能富集分析</p>
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            <span v-for="tag in ['质控', '比对', '定量', '差异分析', '富集分析']" :key="tag" class="text-xs px-2 py-0.5 rounded bg-[#C8E6C9] text-green-900 font-medium">{{ tag }}</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs text-gray-500 mb-3"><span>支持: Human/Mouse/Rat</span><span>已运行: 12 次</span></div>
+          <a href="pages/bulk_rnaseq.html" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg text-sm transition flex items-center justify-center gap-1 shadow-xs no-underline">
+            <span class="material-icons md-18">play_arrow</span> 启动分析
+          </a>
+        </div>
+      </div>
+
+      <div class="rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-all flex flex-col justify-between bg-white">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-icons md-24 text-blue-500">science</span>
+            <span class="text-lg font-bold text-gray-800">scRNA Downstream</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 leading-relaxed">单细胞下游分析流程，包含降维聚类、细胞自动化注释及细胞通讯分析</p>
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            <span v-for="tag in ['Harmony 整合', 'SingleR 注释', '差异比较', 'CellChat 通讯']" :key="tag" class="text-xs px-2 py-0.5 rounded bg-[#B3E5FC] text-blue-900 font-medium">{{ tag }}</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs text-gray-500 mb-3"><span>支持: Human / Mouse</span><span>已运行: 8 次</span></div>
+          <a href="pages/sc_downstream.html" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg text-sm transition flex items-center justify-center gap-1 shadow-xs no-underline">
+            <span class="material-icons md-18">play_arrow</span> 启动分析
+          </a>
+        </div>
+      </div>
+
+      <div class="rounded-xl p-5 border border-gray-200 hover:shadow-lg transition-all flex flex-col justify-between bg-white">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-icons md-24 text-saw">grain</span>
+            <span class="text-lg font-bold text-gray-800">SAW Count</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 leading-relaxed">Stereo-seq 空间转录组分析，支持 CID 空间比对、表达矩阵生成及 StereoMap 可视化</p>
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            <span v-for="tag in ['CID 定位', 'STAR 比对', 'Bin1-100 矩阵', 'HTML 报告']" :key="tag" class="text-xs px-2 py-0.5 rounded bg-[#F3E5F5] text-[#5F1785] font-medium">{{ tag }}</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs text-gray-500 mb-3"><span>支持: Human/Mouse/Rat</span><span>已运行: 6 次</span></div>
+          <a href="pages/saw_count.html" class="w-full text-white font-semibold py-2 rounded-lg text-sm transition flex items-center justify-center gap-1 shadow-xs no-underline" style="background-color: #5F1785;">
+            <span class="material-icons md-18">play_arrow</span> 启动分析
+          </a>
+        </div>
+      </div>
+
+      <div class="rounded-xl p-5 border border-purple-200 hover:shadow-xl transition-all flex flex-col justify-between bg-gradient-to-b from-purple-50/50 to-white">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="material-icons md-24 text-saw">smart_toy</span>
+            <span class="text-lg font-bold text-saw">Chat-Biomni</span>
+          </div>
+          <p class="text-sm text-gray-600 mb-3 leading-relaxed">通用生物医药 AI 科研助手，集成 Stanford Biomni A1 Agent 与 PubMed RAG 检索</p>
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            <span v-for="tag in ['DeepSeek API', 'UniProt 检索', 'A1 Agent', '科研问答']" :key="tag" class="text-xs px-2 py-0.5 rounded bg-[#F3E5F5] text-saw font-semibold">{{ tag }}</span>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-xs text-gray-500 mb-3"><span>模型: DeepSeek V3</span><span class="text-emerald-600 font-semibold">在线 (Ready)</span></div>
+          <a href="pages/chat_biomni.html" class="w-full text-white font-semibold py-2 rounded-lg text-sm transition flex items-center justify-center gap-1 shadow-xs no-underline" style="background-color: #5F1785;">
+            <span class="material-icons md-18">chat</span> 启动对话
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 图表 -->
+  <div class="w-full bg-white rounded-xl p-5 border border-gray-200/80 shadow-xs space-y-4">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="material-icons text-indigo-500">bar_chart</span>
+      <span class="text-lg font-bold text-gray-800">数据统计</span>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="p-3 border border-gray-100 rounded-xl"><div id="home-pie-chart" style="width:100%; height:280px;"></div></div>
+      <div class="p-3 border border-gray-100 rounded-xl"><div id="home-line-chart" style="width:100%; height:280px;"></div></div>
+    </div>
+  </div>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar-drawer');
+      if (sb) sb.classList.toggle('sidebar-collapsed');
+    }
+  </script>
+  
+<script>
+  const { createApp, ref, onMounted } = Vue;
+  createApp({
+    setup() {
+      const tasks = ref([
+        { id: 'TASK_20260825_161526', pipeline: 'Bulk RNA-Seq', time: '2026-08-25 16:15:26' },
+        { id: 'TASK_20260825_142010', pipeline: 'scRNA Downstream', time: '2026-08-25 14:20:10' },
+        { id: 'TASK_20260824_101205', pipeline: 'SAW Count', time: '2026-08-24 10:12:05' },
+        { id: 'TASK_20260823_190412', pipeline: 'DNBC4tools RNA', time: '2026-08-23 19:04:12' },
+        { id: 'TASK_20260822_091533', pipeline: 'Bulk RNA-Seq', time: '2026-08-22 09:15:33' },
+      ]);
+      onMounted(() => {
+        const pieContainer = document.getElementById('home-pie-chart');
+        if (pieContainer) {
+          Plotly.newPlot(pieContainer, [{
+            labels: ['Success', 'Running', 'Failed'],
+            values: [5, 0, 0],
+            type: 'pie', hole: 0.4, marker: { colors: ['#10B981', '#F59E0B', '#EF4444'] }
+          }], { title: '任务状态分布', height: 270, margin: { t: 30, b: 10, l: 10, r: 10 }, paper_bgcolor: 'white' }, { responsive: true, displaylogo: false });
+        }
+        const lineContainer = document.getElementById('home-line-chart');
+        if (lineContainer) {
+          Plotly.newPlot(lineContainer, [{
+            x: ['2026-08-22', '2026-08-23', '2026-08-24', '2026-08-25'],
+            y: [1, 1, 1, 2],
+            type: 'scatter', mode: 'lines+markers', line: { color: '#6366F1', width: 3 }, marker: { size: 8, color: '#6366F1' }
+          }], { title: '任务执行趋势', height: 270, margin: { t: 30, b: 30, l: 30, r: 10 }, paper_bgcolor: 'white', xaxis: { title: '日期' }, yaxis: { title: '任务数量' } }, { responsive: true, displaylogo: false });
+        }
+      });
+      return { tasks };
+    }
+  }).mount('#app');
+</script>
+
+</body>
+</html>

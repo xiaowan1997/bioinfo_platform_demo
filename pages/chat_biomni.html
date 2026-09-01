@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat-Biomni - 医学共享平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            indigo: { 50: '#EEF2FF', 100: '#E0E7FF', 200: '#C7D2FE', 500: '#6366F1', 600: '#4F46E5', 700: '#4338CA' },
+            saw: '#5F1785',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Courier New', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .material-icons { font-size: 20px; vertical-align: middle; }
+    .material-icons.md-18 { font-size: 18px; }
+    .material-icons.md-24 { font-size: 24px; }
+    .material-icons.md-36 { font-size: 36px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-collapsed { width: 5rem !important; }
+    .sidebar-collapsed .sidebar-label { display: none !important; }
+  </style>
+  
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
+    
+    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
+      <div class="flex items-center">
+        <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
+          <span class="material-icons">menu</span>
+        </button>
+        <a href="../index.html" class="text-xl font-bold ml-2 text-indigo-600 tracking-tight no-underline">医学共享平台</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs text-gray-500 font-medium">后端正常</span>
+        </div>
+      </div>
+    </header>
+    
+    <div class="flex-1 flex overflow-hidden">
+      
+    <!-- 侧边栏抽屉 (对齐 frontend/main.py: left_drawer) -->
+    <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
+      <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
+        <div class="flex items-center gap-2 mb-4 px-2">
+          <span class="material-icons text-indigo-600">biotech</span>
+          <span class="text-sm font-bold text-gray-600 sidebar-label">Welcome!</span>
+        </div>
+
+        
+        <a href="../index.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">home</span>
+          <span class="sidebar-label">首页</span>
+        </a>
+        
+        <a href="history.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">history</span>
+          <span class="sidebar-label">历史任务</span>
+        </a>
+        
+        <a href="pipeline.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">biotech</span>
+          <span class="sidebar-label">分析流程</span>
+        </a>
+        
+        <a href="visualization.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline text-gray-600 hover:bg-slate-100 font-medium text-sm">
+          <span class="material-icons text-gray-500">pie_chart</span>
+          <span class="sidebar-label">可视化</span>
+        </a>
+        
+        <a href="chat_biomni.html" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 no-underline bg-indigo-50 text-indigo-700 font-bold text-sm">
+          <span class="material-icons text-indigo-600">smart_toy</span>
+          <span class="sidebar-label">Chat-Biomni</span>
+        </a>
+        
+
+        <div class="flex-1"></div>
+        <div class="my-2 border-t border-gray-100"></div>
+        <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-xs text-gray-500 font-medium sidebar-label">后端正常</span>
+        </div>
+      </div>
+    </aside>
+    
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 bg-slate-50">
+        
+<div class="w-full max-w-4xl mx-auto h-[780px] bg-white rounded-2xl border border-gray-200 shadow-xs flex flex-col overflow-hidden">
+  <div class="p-4 border-b border-gray-200 bg-slate-50 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-saw text-white flex items-center justify-center shadow-xs">
+        <span class="material-icons md-24">smart_toy</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-gray-800 text-sm">Chat-Biomni 生信多智能体问答</h3>
+        <p class="text-gray-400 text-xs">基于 Stanford Biomni A1 与 DeepSeek 推理引擎</p>
+      </div>
+    </div>
+    <span class="text-xs bg-purple-100 text-saw px-2.5 py-1 rounded font-mono font-medium">Model: Biomni-Agent</span>
+  </div>
+
+  <div class="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/50">
+    <div v-for="(msg, i) in messages" :key="i" :class="msg.role === 'user' ? 'justify-end' : 'justify-start'" class="flex gap-3">
+      <div v-if="msg.role === 'assistant'" class="w-8 h-8 rounded-full bg-saw text-white flex items-center justify-center text-xs shrink-0 font-bold">AI</div>
+      <div :class="msg.role === 'user' ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-xs' : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-tl-xs'" class="p-4 max-w-xl text-sm shadow-xs whitespace-pre-wrap leading-relaxed">
+        {{ msg.content }}
+      </div>
+    </div>
+  </div>
+
+  <div class="p-3 bg-white border-t border-gray-100 flex gap-2 overflow-x-auto text-xs">
+    <button v-for="p in prompts" :key="p" @click="send(p)" class="px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-gray-600 shrink-0 transition font-medium">
+      {{ p }}
+    </button>
+  </div>
+
+  <div class="p-4 bg-white border-t border-gray-200 flex gap-3">
+    <input v-model="input" @keyup.enter="send(input)" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none" placeholder="向 Biomni 提问生信分析或参数问题..." />
+    <button @click="send(input)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition">发送</button>
+  </div>
+</div>
+
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar-drawer');
+      if (sb) sb.classList.toggle('sidebar-collapsed');
+    }
+  </script>
+  
+<script>
+  const { createApp, ref } = Vue;
+  createApp({
+    setup() {
+      const input = ref('');
+      const messages = ref([
+        { role: 'assistant', content: '您好！我是 BioinfoCloud 医学共享平台的科研 AI 助手。您可以向我询问生信流水线参数设置、转录组差异分析原理、单细胞聚类注释或空间转录组 SAW 分析的最佳实践！' }
+      ]);
+      const prompts = [
+        '如何过滤单细胞分析中的双细胞 (DoubletFinder)？',
+        'DESeq2 与 edgeR 的核心模型差异是什么？',
+        'Stereo-seq 空间转录组 SAW Count 的关键输入参数有哪些？'
+      ];
+      const send = (txt) => {
+        if (!txt || !txt.trim()) return;
+        messages.value.push({ role: 'user', content: txt });
+        input.value = '';
+        setTimeout(() => {
+          messages.value.push({ role: 'assistant', content: '【Biomni AI 回复】已收到您的生信咨询！平台已将该分析模块化集成至对应 Snakemake 流程中，您可以直接从分析流程目录进入对应页面填写参数一键运行。' });
+        }, 500);
+      };
+      return { input, messages, prompts, send };
+    }
+  }).mount('#app');
+</script>
+
+</body>
+</html>
