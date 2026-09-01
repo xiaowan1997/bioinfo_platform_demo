@@ -10,7 +10,7 @@
 
 ```
 gh_pages/
-├── index.html                     # 首页 (河南中医药大学测序数据分析平台)
+├── index.html                     # 首页 (生物信息学测序数据云分析平台)
 ├── pages/
 │   ├── history.html               # 历史任务管理中枢 (含状态筛选与操作)
 │   ├── pipeline.html              # 8 大分析流程目录总览
