@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stereo-seq SAW 空间转录组分析交付报告 - BioinfoCloud</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased">
+  <div class="max-w-7xl mx-auto p-6 md:p-10 space-y-8">
+    
+    <!-- 顶部横幅 -->
+    <div class="bg-gradient-to-r from-[#5F1785] to-purple-900 text-white rounded-3xl p-8 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-2">Stereo-seq SAW v8.2.2 Delivery</div>
+        <h1 class="text-3xl font-bold">华大时空转录组分析交付报告 (SAW Count)</h1>
+        <p class="text-purple-100 text-sm mt-1">芯片 SN: SS200000134BL_E5 · 空间 CID 配准 · Bin1~100 多尺度表达定量 · StereoMap 包已导出</p>
+      </div>
+      <div class="text-right text-xs text-purple-100 font-mono bg-white/10 p-3 rounded-2xl border border-white/20">
+        <div>任务编号: TASK_20260824_101205</div>
+        <div>芯片规格: 1cm x 1cm (FF)</div>
+        <div>总读取数: 284.5 M Reads</div>
+      </div>
+    </div>
+
+    <!-- 空间芯片指标 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
+        <div class="text-xs text-gray-400 font-medium">芯片 CID 有效捕获率</div>
+        <div class="text-2xl font-bold text-[#5F1785] mt-1">91.4%</div>
+        <div class="text-[11px] text-green-600 mt-0.5">Mask 匹配度极高</div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
+        <div class="text-xs text-gray-400 font-medium">全基因组比对率 (STAR)</div>
+        <div class="text-2xl font-bold text-emerald-600 mt-1">88.6%</div>
+        <div class="text-[11px] text-gray-400 mt-0.5">参考基因组: mm10</div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
+        <div class="text-xs text-gray-400 font-medium">有效组织 Bin50 斑点数</div>
+        <div class="text-2xl font-bold text-blue-600 mt-1">28,420</div>
+        <div class="text-[11px] text-gray-400 mt-0.5">中位 UMI: 1,450 / Bin50</div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
+        <div class="text-xs text-gray-400 font-medium">CellBin 分割细胞数</div>
+        <div class="text-2xl font-bold text-purple-600 mt-1">42,150 Cells</div>
+        <div class="text-[11px] text-purple-600 mt-0.5">显微镜核染色精确识别</div>
+      </div>
+    </div>
+
+    <!-- 空间表达热图交互 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+        <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+          <span class="material-icons text-[#5F1785]">grain</span>
+          <span>空间芯片组织总 UMI 信号密度图 (Bin50)</span>
+        </h3>
+        <p class="text-xs text-gray-500">模拟展现小鼠脑冠状切片 (Coronal Section) 空间分子捕获强度</p>
+        <div id="spatial-heatmap" style="width:100%; height:440px;"></div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+        <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+          <span class="material-icons text-purple-500">scatter_plot</span>
+          <span>空间域聚类 (Spatial Domain Clustering)</span>
+        </h3>
+        <p class="text-xs text-gray-500">皮层 (Cortex), 海马区 (Hippocampus), 丘脑 (Thalamus) 空间分区识别</p>
+        <div id="spatial-cluster" style="width:100%; height:440px;"></div>
+      </div>
+    </div>
+
+    <!-- 交付物清单卡片 -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+      <h3 class="font-bold text-gray-800 text-base flex items-center gap-2">
+        <span class="material-icons text-green-600">inventory_2</span>
+        <span>分析产物清单 (可在服务器结果目录直接查看)</span>
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs font-mono">
+        <div class="p-3 bg-slate-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-gray-800">SS200000134BL_E5.tissue.gef</div>
+          <div class="text-gray-400 mt-1">Bin1~100 紧凑全尺寸空间矩阵</div>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-gray-800">SS200000134BL_E5.cellbin.gef</div>
+          <div class="text-gray-400 mt-1">单细胞分割定位与单细胞矩阵</div>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-gray-200">
+          <div class="font-bold text-gray-800">SS200000134BL_E5.tar.gz</div>
+          <div class="text-gray-400 mt-1">StereoMap 桌面端一键导入包</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 模拟空间热图
+    const z = [];
+    for(let i=0; i<40; i++) {
+      const row = [];
+      for(let j=0; j<40; j++) {
+        const dist = Math.sqrt((i-20)*(i-20) + (j-20)*(j-20));
+        row.push(dist < 16 ? Math.max(0, 100 - dist*5 + Math.random()*20) : Math.random()*5);
+      }
+      z.push(row);
+    }
+    Plotly.newPlot('spatial-heatmap', [{
+      z: z, type: 'heatmap', colorscale: 'Viridis'
+    }], {
+      title: '空间芯片分子密度热图',
+      margin: { l: 30, r: 20, t: 30, b: 30 }
+    }, { responsive: true, displaylogo: false });
+
+    // 空间聚类
+    Plotly.newPlot('spatial-cluster', [
+      { x: [10, 12, 14, 16, 18, 20, 22], y: [30, 32, 33, 33, 32, 30, 28], mode: 'markers', name: '大脑皮层 (Cortex)', marker: { size: 8, color: '#3B82F6' } },
+      { x: [16, 18, 20, 22, 24], y: [22, 23, 24, 23, 22], mode: 'markers', name: '海马区 (Hippocampus)', marker: { size: 8, color: '#10B981' } },
+      { x: [18, 20, 22], y: [14, 15, 14], mode: 'markers', name: '丘脑 (Thalamus)', marker: { size: 8, color: '#F59E0B' } }
+    ], {
+      xaxis: { range: [0, 40] }, yaxis: { range: [0, 40] },
+      title: '解剖学空间聚类结构图',
+      margin: { l: 30, r: 20, t: 30, b: 30 }
+    }, { responsive: true, displaylogo: false });
+  </script>
+</body>
+</html>

@@ -46,7 +46,7 @@
 <body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
   <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
     
-    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <!-- 顶部导航栏 -->
     <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
       <div class="flex items-center">
         <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
@@ -65,7 +65,7 @@
     
     <div class="flex-1 flex overflow-hidden">
       
-    <!-- 侧边栏抽屉 (对齐 frontend/main.py: left_drawer) -->
+    <!-- 侧边栏抽屉 -->
     <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
       <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
         <div class="flex items-center gap-2 mb-4 px-2">
@@ -160,16 +160,53 @@
             <td class="py-3 px-4 text-center" v-html="renderStatusChip(task.Status)"></td>
             <td class="py-3 px-4 text-center">
               <div class="flex items-center justify-center gap-1">
-                <button @click="openDetails(task)" title="详情" class="p-1 rounded hover:bg-blue-50 text-blue-600"><span class="material-icons md-18">expand_more</span></button>
-                <button @click="openReport(task)" title="报告" class="p-1 rounded hover:bg-indigo-50 text-indigo-600"><span class="material-icons md-18">description</span></button>
-                <button @click="openLogs(task)" title="日志" class="p-1 rounded hover:bg-purple-50 text-purple-600"><span class="material-icons md-18">article</span></button>
-                <button @click="rerunTask(task)" title="重跑" class="p-1 rounded hover:bg-green-50 text-green-600"><span class="material-icons md-18">replay</span></button>
-                <button @click="deleteTask(task.Task_ID)" title="删除" class="p-1 rounded hover:bg-red-50 text-red-600"><span class="material-icons md-18">delete</span></button>
+                <button @click="openDetails(task)" title="任务详情与交付物审计" class="p-1.5 rounded hover:bg-blue-50 text-blue-600"><span class="material-icons md-18">expand_more</span></button>
+                <a :href="'../' + task.Report_Url" target="_blank" title="在新标签页中打开全功能分析报告" class="p-1.5 rounded hover:bg-indigo-50 text-indigo-600 inline-flex items-center justify-center no-underline">
+                  <span class="material-icons md-18">description</span>
+                </a>
+                <button @click="openLogs(task)" title="查看执行日志" class="p-1.5 rounded hover:bg-purple-50 text-purple-600"><span class="material-icons md-18">article</span></button>
+                <button @click="rerunTask(task)" title="重新运行任务" class="p-1.5 rounded hover:bg-green-50 text-green-600"><span class="material-icons md-18">replay</span></button>
+                <button @click="deleteTask(task.Task_ID)" title="删除任务" class="p-1.5 rounded hover:bg-red-50 text-red-600"><span class="material-icons md-18">delete</span></button>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- 任务详情下钻弹窗 (对齐 history.py: _show_task_details_dialog) -->
+  <div v-if="detailsModalOpen" class="fixed inset-0 z-50 bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-[1000px] max-w-[95vw] max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 bg-blue-600 text-white font-bold text-base flex justify-between items-center">
+        <span>任务详情与交付物审计 - {{ activeTask.Task_ID }}</span>
+        <button @click="detailsModalOpen = false" class="text-white hover:opacity-80"><span class="material-icons">close</span></button>
+      </div>
+      <div class="p-6 overflow-y-auto space-y-4 bg-slate-50 text-xs">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
+            <h4 class="font-bold text-sm text-gray-800 mb-2">执行配置</h4>
+            <div>流程类型: <strong>{{ activeTask.Pipeline }}</strong></div>
+            <div>运行耗时: {{ activeTask.Duration_Str }}</div>
+            <div>执行引擎: Snakemake + Celery</div>
+            <div>计算核心: 32 Cores</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
+            <h4 class="font-bold text-sm text-gray-800 mb-2">分析交付报告</h4>
+            <p class="text-gray-500">点击下方按钮直接打开已生成的真实交互报告：</p>
+            <a :href="'../' + activeTask.Report_Url" target="_blank" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg text-center flex items-center justify-center gap-1 no-underline shadow-xs mt-2">
+              <span class="material-icons md-18">open_in_new</span> 查看完整 HTML 报告
+            </a>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-gray-200 space-y-2">
+            <h4 class="font-bold text-sm text-gray-800 mb-2">物理结果文件</h4>
+            <div class="text-gray-600 truncate font-mono">📁 report.html</div>
+            <div class="text-gray-600 truncate font-mono">📁 count_matrix.tsv</div>
+            <div class="text-gray-600 truncate font-mono">📁 deg_results.csv</div>
+            <div class="text-gray-600 truncate font-mono">📁 volcano_plot.pdf</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -190,27 +227,37 @@
   createApp({
     setup() {
       const filter = ref('all');
+      const detailsModalOpen = ref(false);
+      const activeTask = ref({});
+
       const tasks = ref([
-        { Task_ID: 'TASK_20260825_161526', Pipeline: 'Bulk RNA-Seq', Start_Time: '2026-08-25 16:15:26', Duration_Str: '28m 16s', Status: 'Success' },
-        { Task_ID: 'TASK_20260825_142010', Pipeline: 'scRNA Downstream', Start_Time: '2026-08-25 14:20:10', Duration_Str: '49m 04s', Status: 'Success' },
-        { Task_ID: 'TASK_20260824_101205', Pipeline: 'SAW Count', Start_Time: '2026-08-24 10:12:05', Duration_Str: '4h 35m', Status: 'Success' },
-        { Task_ID: 'TASK_20260823_190412', Pipeline: 'DNBC4tools RNA', Start_Time: '2026-08-23 19:04:12', Duration_Str: '1h 12m', Status: 'Success' },
-        { Task_ID: 'TASK_20260822_091533', Pipeline: 'Bulk RNA-Seq', Start_Time: '2026-08-22 09:15:33', Duration_Str: '24m 50s', Status: 'Success' },
+        { Task_ID: 'TASK_20260603_161526', Pipeline: 'Bulk RNA-Seq', Start_Time: '2026-06-03 16:15:26', Duration_Str: '28m 16s', Status: 'Success', Report_Url: 'reports/bulk_rnaseq_report.html' },
+        { Task_ID: 'TASK_20260516_203346', Pipeline: 'DNBC4tools RNA', Start_Time: '2026-05-16 20:33:46', Duration_Str: '1h 12m', Status: 'Success', Report_Url: 'reports/dnbc4_scRNA_report.html' },
+        { Task_ID: 'TASK_20260516_203523', Pipeline: 'DNBC4tools ATAC', Start_Time: '2026-05-16 20:35:23', Duration_Str: '45m 20s', Status: 'Success', Report_Url: 'reports/dnbc4_scATAC_report.html' },
+        { Task_ID: 'TASK_20260825_142010', Pipeline: 'scRNA Downstream', Start_Time: '2026-08-25 14:20:10', Duration_Str: '49m 04s', Status: 'Success', Report_Url: 'reports/scrna_downstream_report.html' },
+        { Task_ID: 'TASK_20260824_101205', Pipeline: 'SAW Count', Start_Time: '2026-08-24 10:12:05', Duration_Str: '4h 35m', Status: 'Success', Report_Url: 'reports/saw_spatial_report.html' },
       ]);
+
       const filteredTasks = computed(() => {
         if (filter.value === 'all') return tasks.value;
         return tasks.value.filter(t => t.Status.toLowerCase() === filter.value);
       });
+
       const renderStatusChip = (s) => {
         const c = s.toLowerCase() === 'success' ? '#D1FAE5;color:#065F46' : '#FEF3C7;color:#92400E';
         return `<span style="background:${c};padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600">${s}</span>`;
       };
-      const openDetails = (t) => alert(`任务详情: ${t.Task_ID}\n流程: ${t.Pipeline}\n配置: 32 Cores | GRCh38 | DESeq2`);
-      const openReport = (t) => alert(`正在打开任务 ${t.Task_ID} 的 HTML 分析交付报告...`);
-      const openLogs = (t) => alert(`[LOG] Task ${t.Task_ID}\n[INFO] Rule fastp -> hisat2 -> featureCounts -> deseq2 -> Done!`);
+
+      const openDetails = (t) => {
+        activeTask.value = t;
+        detailsModalOpen.value = true;
+      };
+
+      const openLogs = (t) => alert(`[LOG] Task ${t.Task_ID}\n[INFO] Rule fastp -> hisat2 -> featureCounts -> deseq2 -> Done!\n[SUCCESS] 任务计算完成，报告已归档至 ${t.Report_Url}`);
       const rerunTask = (t) => alert(`任务 ${t.Task_ID} 已加入 Celery 重新执行！`);
       const deleteTask = (id) => { if(confirm(`确认删除任务 ${id}？`)) tasks.value = tasks.value.filter(t => t.Task_ID !== id); };
-      return { filter, tasks, filteredTasks, renderStatusChip, openDetails, openReport, openLogs, rerunTask, deleteTask };
+
+      return { filter, tasks, filteredTasks, detailsModalOpen, activeTask, renderStatusChip, openDetails, openLogs, rerunTask, deleteTask };
     }
   }).mount('#app');
 </script>

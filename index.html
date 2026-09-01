@@ -46,7 +46,7 @@
 <body class="bg-slate-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
   <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen">
     
-    <!-- 顶部导航栏 (对齐 frontend/main.py: setup_layout) -->
+    <!-- 顶部导航栏 -->
     <header class="bg-white text-gray-800 items-center px-4 py-2 flex border-b border-gray-200 sticky top-0 z-30 shadow-xs justify-between">
       <div class="flex items-center">
         <button onclick="toggleSidebar()" class="p-1.5 rounded-full hover:bg-gray-100 text-gray-700 transition">
@@ -65,7 +65,7 @@
     
     <div class="flex-1 flex overflow-hidden">
       
-    <!-- 侧边栏抽屉 (对齐 frontend/main.py: left_drawer) -->
+    <!-- 侧边栏抽屉 -->
     <aside id="sidebar-drawer" class="w-64 bg-white border-r border-gray-200 flex flex-col transition-all duration-200 ease-in-out overflow-hidden z-20 shrink-0">
       <div class="p-4 w-full flex-1 flex flex-col gap-1 overflow-y-auto">
         <div class="flex items-center gap-2 mb-4 px-2">
@@ -114,7 +114,7 @@
 <div class="w-full max-w-7xl mx-auto space-y-6">
   <div class="w-full bg-indigo-600 text-white rounded-2xl p-6 shadow-md flex items-center justify-between">
     <div class="space-y-1">
-      <h1 class="text-2xl font-bold tracking-tight">测序数据分析平台</h1>
+      <h1 class="text-2xl font-bold tracking-tight">河南中医药大学测序数据分析平台</h1>
       <p class="text-sm opacity-80 font-mono">Bioinfomation Platform</p>
     </div>
     <span class="bg-white text-indigo-600 font-bold text-sm px-3 py-1 rounded-full shadow-xs">1.0</span>
@@ -140,14 +140,14 @@
     </a>
   </div>
 
-  <!-- 最近任务 -->
+  <!-- 最近任务 (包含直接查看报告入口) -->
   <div class="w-full bg-white rounded-xl p-5 border border-gray-200/80 shadow-xs space-y-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <span class="material-icons text-indigo-500">history</span>
         <span class="text-lg font-bold text-gray-800">最近任务历史</span>
       </div>
-      <a href="pages/history.html" class="text-xs text-indigo-600 hover:underline font-semibold no-underline">查看全量任务 &rarr;</a>
+      <a href="pages/history.html" class="text-xs text-indigo-600 hover:underline font-semibold no-underline">进入任务管理中枢 &rarr;</a>
     </div>
 
     <div class="overflow-x-auto">
@@ -158,6 +158,7 @@
             <th class="py-3 px-4">流程</th>
             <th class="py-3 px-4">开始时间</th>
             <th class="py-3 px-4 text-center">状态</th>
+            <th class="py-3 px-4 text-center">报告交付物</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -167,6 +168,11 @@
             <td class="py-3 px-4 text-gray-500 text-xs">{{ t.time }}</td>
             <td class="py-3 px-4 text-center">
               <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Success</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <a :href="t.report" target="_blank" class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold px-2.5 py-1 bg-indigo-50 rounded hover:bg-indigo-100 transition no-underline inline-flex items-center gap-1">
+                <span class="material-icons text-xs">open_in_new</span> 查看报告
+              </a>
             </td>
           </tr>
         </tbody>
@@ -292,12 +298,13 @@
   createApp({
     setup() {
       const tasks = ref([
-        { id: 'TASK_20260825_161526', pipeline: 'Bulk RNA-Seq', time: '2026-08-25 16:15:26' },
-        { id: 'TASK_20260825_142010', pipeline: 'scRNA Downstream', time: '2026-08-25 14:20:10' },
-        { id: 'TASK_20260824_101205', pipeline: 'SAW Count', time: '2026-08-24 10:12:05' },
-        { id: 'TASK_20260823_190412', pipeline: 'DNBC4tools RNA', time: '2026-08-23 19:04:12' },
-        { id: 'TASK_20260822_091533', pipeline: 'Bulk RNA-Seq', time: '2026-08-22 09:15:33' },
+        { id: 'TASK_20260603_161526', pipeline: 'Bulk RNA-Seq', time: '2026-06-03 16:15:26', report: 'reports/bulk_rnaseq_report.html' },
+        { id: 'TASK_20260516_203346', pipeline: 'DNBC4tools RNA', time: '2026-05-16 20:33:46', report: 'reports/dnbc4_scRNA_report.html' },
+        { id: 'TASK_20260516_203523', pipeline: 'DNBC4tools ATAC', time: '2026-05-16 20:35:23', report: 'reports/dnbc4_scATAC_report.html' },
+        { id: 'TASK_20260825_142010', pipeline: 'scRNA Downstream', time: '2026-08-25 14:20:10', report: 'reports/scrna_downstream_report.html' },
+        { id: 'TASK_20260824_101205', pipeline: 'SAW Count', time: '2026-08-24 10:12:05', report: 'reports/saw_spatial_report.html' },
       ]);
+
       onMounted(() => {
         const pieContainer = document.getElementById('home-pie-chart');
         if (pieContainer) {
@@ -310,8 +317,8 @@
         const lineContainer = document.getElementById('home-line-chart');
         if (lineContainer) {
           Plotly.newPlot(lineContainer, [{
-            x: ['2026-08-22', '2026-08-23', '2026-08-24', '2026-08-25'],
-            y: [1, 1, 1, 2],
+            x: ['2026-05-16', '2026-06-03', '2026-08-24', '2026-08-25'],
+            y: [2, 1, 1, 1],
             type: 'scatter', mode: 'lines+markers', line: { color: '#6366F1', width: 3 }, marker: { size: 8, color: '#6366F1' }
           }], { title: '任务执行趋势', height: 270, margin: { t: 30, b: 30, l: 30, r: 10 }, paper_bgcolor: 'white', xaxis: { title: '日期' }, yaxis: { title: '任务数量' } }, { responsive: true, displaylogo: false });
         }

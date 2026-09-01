@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>单细胞下游高级分析报告 (scRNA Downstream) - BioinfoCloud</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Icons" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-gray-800 font-sans antialiased">
+  <div class="max-w-7xl mx-auto p-6 md:p-10 space-y-8">
+    
+    <!-- 顶部横幅 -->
+    <div class="bg-gradient-to-r from-blue-700 to-indigo-700 text-white rounded-3xl p-8 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-2">BioinfoCloud Analysis Delivery</div>
+        <h1 class="text-3xl font-bold">单细胞转录组高级下游分析报告</h1>
+        <p class="text-blue-100 text-sm mt-1">Seurat V5 降维聚类 · DoubletFinder 去双细胞 · SingleR 自动化注释 · CellChat 细胞通讯</p>
+      </div>
+      <div class="text-right text-xs text-blue-100 font-mono bg-white/10 p-3 rounded-2xl border border-white/20">
+        <div>任务编号: TASK_20260825_142010</div>
+        <div>分析完成: 2026-08-25 15:09:14</div>
+        <div>总细胞数: 14,850 Cells</div>
+      </div>
+    </div>
+
+    <!-- KPI 统计卡片 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
+        <div class="text-xs text-gray-400 font-medium">质控后细胞总数</div>
+        <div class="text-2xl font-bold text-blue-600 mt-1">14,850</div>
+        <div class="text-[11px] text-green-600 mt-0.5">过滤双细胞 1,120 个</div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
+        <div class="text-xs text-gray-400 font-medium">中位基因数 (nFeature)</div>
+        <div class="text-2xl font-bold text-indigo-600 mt-1">2,430</div>
+        <div class="text-[11px] text-gray-400 mt-0.5">UMI 中位数: 8,620</div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
+        <div class="text-xs text-gray-400 font-medium">识别主要细胞大类</div>
+        <div class="text-2xl font-bold text-purple-600 mt-1">7 Clusters</div>
+        <div class="text-[11px] text-gray-400 mt-0.5">SingleR Monaco 参考库</div>
+      </div>
+      <div class="bg-white p-5 rounded-2xl border border-gray-200/80 shadow-xs text-center">
+        <div class="text-xs text-gray-400 font-medium">细胞间互作信号对</div>
+        <div class="text-2xl font-bold text-emerald-600 mt-1">342 Pairs</div>
+        <div class="text-[11px] text-emerald-600 mt-0.5">CellChat 配受体互作显著</div>
+      </div>
+    </div>
+
+    <!-- 交互图表 1: UMAP 细胞分群与注释 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+        <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+          <span class="material-icons text-blue-500">scatter_plot</span>
+          <span>UMAP 细胞类型自动化注释图 (SingleR)</span>
+        </h3>
+        <p class="text-xs text-gray-500">经 Harmony 批次校正后，基于 UMAP 降维空间展示 7 大细胞亚群分布</p>
+        <div id="umap-chart" style="width:100%; height:420px;"></div>
+      </div>
+
+      <!-- 交互图表 2: 标志物表达小提琴图 -->
+      <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs space-y-3">
+        <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+          <span class="material-icons text-indigo-500">bar_chart</span>
+          <span>Top Marker Genes 细胞特异性标志物表达</span>
+        </h3>
+        <p class="text-xs text-gray-500">CD3D (T cell), CD79A (B cell), CD14 (Monocyte), NKG7 (NK cell)</p>
+        <div id="marker-chart" style="width:100%; height:420px;"></div>
+      </div>
+    </div>
+
+    <!-- 细胞类型比例表 -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-xs space-y-4">
+      <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+        <span class="material-icons text-purple-500">table_chart</span>
+        <span>细胞亚群定型与丰度分布统计表</span>
+      </h3>
+      <div class="overflow-x-auto text-xs">
+        <table class="w-full text-left">
+          <thead class="bg-slate-50 text-gray-500 uppercase border-y border-gray-200">
+            <tr>
+              <th class="p-3">Cluster ID</th>
+              <th class="p-3">注释细胞类型 (Cell Type)</th>
+              <th class="p-3">细胞数 (Count)</th>
+              <th class="p-3">占比 (Percentage)</th>
+              <th class="p-3">标志基因 (Key Markers)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 font-mono">
+            <tr><td class="p-3 font-bold text-blue-600">Cluster 0</td><td>CD4+ T Cells</td><td>4,210</td><td>28.3%</td><td>IL7R, CD4, CCR7</td></tr>
+            <tr><td class="p-3 font-bold text-emerald-600">Cluster 1</td><td>CD8+ T Cells</td><td>3,540</td><td>23.8%</td><td>CD8A, CD8B, GZMK</td></tr>
+            <tr><td class="p-3 font-bold text-purple-600">Cluster 2</td><td>B Cells</td><td>2,450</td><td>16.5%</td><td>MS4A1, CD79A, CD19</td></tr>
+            <tr><td class="p-3 font-bold text-amber-600">Cluster 3</td><td>CD14+ Monocytes</td><td>1,980</td><td>13.3%</td><td>CD14, LYZ, S100A9</td></tr>
+            <tr><td class="p-3 font-bold text-rose-600">Cluster 4</td><td>NK Cells</td><td>1,420</td><td>9.6%</td><td>NKG7, GNLY, NCAM1</td></tr>
+            <tr><td class="p-3 font-bold text-teal-600">Cluster 5</td><td>FCGR3A+ Monocytes</td><td>850</td><td>5.7%</td><td>FCGR3A, MS4A7</td></tr>
+            <tr><td class="p-3 font-bold text-slate-600">Cluster 6</td><td>Dendritic Cells (DC)</td><td>400</td><td>2.7%</td><td>HLA-DQA1, CLEC9A</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 渲染 UMAP
+    const clusters = [
+      { name: 'CD4+ T Cells', n: 120, x0: -2, y0: 3, col: '#3B82F6' },
+      { name: 'CD8+ T Cells', n: 100, x0: -3, y0: -1, col: '#10B981' },
+      { name: 'B Cells', n: 80, x0: 4, y0: 2, col: '#8B5CF6' },
+      { name: 'CD14+ Monocytes', n: 70, x0: 2, y0: -4, col: '#F59E0B' },
+      { name: 'NK Cells', n: 50, x0: -5, y0: 1, col: '#EF4444' },
+      { name: 'FCGR3A+ Monocytes', n: 30, x0: 3, y0: -2, col: '#14B8A6' },
+      { name: 'Dendritic Cells', n: 20, x0: 1, y0: 5, col: '#64748B' },
+    ];
+    const dataUMAP = clusters.map(c => {
+      const x = [], y = [];
+      for(let i=0; i<c.n; i++) {
+        x.push(c.x0 + (Math.random()-0.5)*2.5);
+        y.push(c.y0 + (Math.random()-0.5)*2.5);
+      }
+      return { x, y, mode: 'markers', name: c.name, marker: { size: 5, color: c.col, opacity: 0.7 } };
+    });
+    Plotly.newPlot('umap-chart', dataUMAP, {
+      xaxis: { title: 'UMAP_1', zeroline: false },
+      yaxis: { title: 'UMAP_2', zeroline: false },
+      margin: { l: 40, r: 20, t: 20, b: 40 },
+      legend: { orientation: 'h', y: -0.2 }
+    }, { responsive: true, displaylogo: false });
+
+    // 渲染 Marker 条形图
+    Plotly.newPlot('marker-chart', [{
+      x: ['CD4+ T', 'CD8+ T', 'B Cell', 'CD14+ Mono', 'NK Cell'],
+      y: [8.5, 9.2, 12.4, 7.8, 11.2],
+      type: 'bar',
+      marker: { color: ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B', '#EF4444'] }
+    }], {
+      title: '细胞特异性 Marker 平均表达强度 (logNorm)',
+      yaxis: { title: 'Mean Expression' },
+      margin: { l: 40, r: 20, t: 40, b: 40 }
+    }, { responsive: true, displaylogo: false });
+  </script>
+</body>
+</html>
