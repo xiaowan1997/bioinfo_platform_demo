@@ -28,26 +28,6 @@ gh_pages/
 
 ---
 
-## 🚀 1 分钟发布到 GitHub Pages
-
-1. 在 GitHub 上新建一个公开仓库（例如命名为 `bioinfo-platform-demo`）；
-2. 在本地终端进入 `gh_pages` 文件夹并推送到远程仓库：
-   ```bash
-   cd gh_pages
-   git init
-   git add .
-   git commit -m "feat: release multi-page bioinfo cloud interactive demo"
-   git branch -M main
-   git remote add origin https://github.com/<你的GitHub用户名>/bioinfo-platform-demo.git
-   git push -u origin main
-   ```
-3. 打开仓库页面的 **Settings** $	o$ **Pages**：
-   - **Branch** 选择 `main`，目录选择 `/ (root)`，点击 **Save**。
-4. 稍等 30 秒即可获得专属在线展示网址：
-   👉 `https://<你的GitHub用户名>.github.io/bioinfo-platform-demo/`
-
----
-
 ## 💻 本地直接预览
 
 你可以直接在本地电脑上双击 `index.html`，浏览器打开后点击任何侧边栏、卡片和按钮，都会如同真实部署的网站一样在各个子页面之间流畅跳转！
